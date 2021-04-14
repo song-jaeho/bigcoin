@@ -7,18 +7,27 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.jackson.JsonNodeValueReader;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class CommonUtil {
 	// string 형의 JSON 값을 파싱	
 		static JSONParser jsonParser;
 		static ModelMapper modelMapper;
+		static ObjectMapper objectMapper;
 
 		/** 초기화 */
 		static
 		{
 		    modelMapper = new ModelMapper();
 		    modelMapper.getConfiguration().addValueReader(new JsonNodeValueReader());
+		    // [songjaeho] 가져오는 json string의 변수명 케이스 타입 
 		    modelMapper.getConfiguration().setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
+		    // [songjaeho] 매핑하고자 하는 필드 (대상 클래스)의 변수명 케이스 타입 
+		    modelMapper.getConfiguration().setDestinationNameTokenizer(NameTokenizers.CAMEL_CASE);
 		    jsonParser = new JSONParser();
+		    
+		    objectMapper = new ObjectMapper();
 		}
 
 
@@ -44,5 +53,9 @@ public class CommonUtil {
 		        e.printStackTrace();
 		        return null;
 		    }
+		}
+		
+		public static String makeJsonString(Object o) throws JsonProcessingException {
+			return objectMapper.writeValueAsString(o);
 		}
 }

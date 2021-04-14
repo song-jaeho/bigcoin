@@ -1,6 +1,5 @@
 package com.bigcoin.handler;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,7 +10,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.bigcoin.constants.RestApiConstants;
 import com.bigcoin.service.CurrencyService;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +38,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         log.info("client{} connect", session.getRemoteAddress());
         
         
-        String jsonResult = currencyService.getAllCurrency(RestApiConstants.BITHUMB_ALL_KRW);
+        String jsonResult = currencyService.getAllCurrency();
         TextMessage message = new TextMessage(jsonResult);
         
         for (WebSocketSession webSocketSession : sessions) {
