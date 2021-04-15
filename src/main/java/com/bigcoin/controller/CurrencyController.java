@@ -1,5 +1,8 @@
 package com.bigcoin.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -8,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bigcoin.common.util.CommonUtil;
 import com.bigcoin.dto.CurrencyData;
 import com.bigcoin.service.CurrencyService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,15 +41,23 @@ public class CurrencyController {
 	}
 	
 	
-	
 	@RequestMapping(value = {"/test"})
-	public ResponseEntity<String> test() throws JsonProcessingException {
-		ResponseEntity<String> response = null; 
+	public ResponseEntity<Object> test() throws JsonProcessingException {
+		ResponseEntity<Object> response = null; 
 		
 		ValueOperations<String, Object> vop = redisTemplate.opsForValue();
-		CurrencyData currencyData = (CurrencyData) vop.get("ETH");
+		List<CurrencyData> dataList = new ArrayList<CurrencyData>();
 		
-		response = new ResponseEntity<String>(CommonUtil.makeJsonString(currencyData), HttpStatus.OK);
+		redisTemplate.keys("*").stream()
+			.filter(key -> {
+				return !key.equals("date") && !key.equals("status"); // 이거 나중에 상수로 변경? 
+			})
+			.forEach(key -> {
+				CurrencyData currencyData = (CurrencyData) vop.get(key);
+				dataList.add(currencyData);
+			});
+		
+		response = new ResponseEntity<Object>(dataList, HttpStatus.OK);
 		
 		return response;
 	}

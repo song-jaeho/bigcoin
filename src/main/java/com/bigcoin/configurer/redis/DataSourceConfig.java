@@ -1,4 +1,4 @@
-package com.bigcoin.configurer;
+package com.bigcoin.configurer.redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

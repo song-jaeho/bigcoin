@@ -1,4 +1,4 @@
-package com.bigcoin.configurer;
+package com.bigcoin.configurer.websocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
