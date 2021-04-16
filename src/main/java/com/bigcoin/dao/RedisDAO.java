@@ -1,7 +1,12 @@
 package com.bigcoin.dao;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +40,19 @@ public class RedisDAO {
 	
 	public Object vopGet(String key) {
 		return redisTemplate.opsForValue().get(key);
+	}
+	
+	public List<Object> vopGetAll() {
+		
+		ValueOperations<String, Object> vop = redisTemplate.opsForValue();
+		List<Object> resultList = new ArrayList<Object>();
+		
+		Iterator<String> it = redisTemplate.keys("*").iterator();
+		while(it.hasNext()) {
+			resultList.add(vop.get(it.next()));
+		}
+		
+		return resultList;
 	}
 
 }

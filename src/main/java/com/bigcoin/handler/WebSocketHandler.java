@@ -3,11 +3,15 @@ package com.bigcoin.handler;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import com.bigcoin.common.util.CommonUtil;
+import com.bigcoin.dao.RedisDAO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +21,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class WebSocketHandler extends TextWebSocketHandler {
 
-	private static Set<WebSocketSession> sessions = ConcurrentHashMap.newKeySet();
+	public static Set<WebSocketSession> sessions = ConcurrentHashMap.newKeySet();
+	
+	private RedisDAO redisDAO;
+	
+	@Autowired
+	public WebSocketHandler(RedisDAO redisDAO) {
+		super();
+		this.redisDAO = redisDAO;
+	}
 	
 	@Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -25,6 +37,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         
         sessions.add(session);
         log.info("client{} connect", session.getRemoteAddress());
+        
+        String allCurrencyData = CommonUtil.makeJsonString(redisDAO.vopGetAll());
+        session.sendMessage(new TextMessage(allCurrencyData));
     }
 
     @Override

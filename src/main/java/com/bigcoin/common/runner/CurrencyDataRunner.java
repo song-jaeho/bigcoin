@@ -39,9 +39,9 @@ public class CurrencyDataRunner implements ApplicationRunner {
 			});
 		
 		// 테스트용!!!!
-		System.out.println(redisDAO.vopGet("ETH"));
-		System.out.println(redisDAO.vopGet("QTUM"));
-		System.out.println(redisDAO.vopGet("date"));
+//		System.out.println(redisDAO.vopGet("ETH"));
+//		System.out.println(redisDAO.vopGet("QTUM"));
+//		System.out.println(redisDAO.vopGet("date"));
 	}
 
 }

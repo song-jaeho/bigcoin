@@ -66,5 +66,6 @@ public class CurrencyData implements Serializable {
 	
 	@JsonProperty("fluctate_rate_24H")
 	private String fluctateRate24H;
+
 	
 }
