@@ -1,141 +1,200 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="EUC-KR">
-<title>Insert title here</title>
 
-<style type="text/css">
-.list-complete li{
-  transition: all 0.8s ease;
-  display: inline-block;
-  margin-right: 10px;
-}
-</style>
+<head>
+
+	<title>BigCoin</title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<style>
+		/* Remove the navbar's default margin-bottom and rounded borders */
+		.navbar {
+			margin-bottom: 0;
+			border-radius: 0;
+		}
+
+		/* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+		.row.content {
+			height: 450px
+		}
+
+		/* Set gray background color and 100% height */
+		.sidenav {
+			padding-top: 20px;
+			background-color: #f1f1f1;
+			height: 100%;
+		}
+
+		/* Set black background color, white text and some padding */
+		footer {
+			background-color: #555;
+			color: white;
+			padding: 15px;
+		}
+
+		/* On small screens, set height to 'auto' for sidenav and grid */
+		@media screen and (max-width: 767px) {
+			.sidenav {
+				height: auto;
+				padding: 15px;
+			}
+
+			.row.content {
+				height: auto;
+			}
+		}
+	</style>
 </head>
+
 <body>
-<div id="app">
-    <h1 style="text-align: center;">Hello Bigcoin</h1><br>
-    
-    <!--
-    <div style="text-align: center;">
-        <form action="">
-            <input onclick="connect()" value="Connect" type="button">
-            <input onclick="send_message()" value="Send" type="button">
-            <input id="textID" name="message" value="Hello WebSocket!" type="text"><br>
-        </form>
-    </div>
-    <div id="output"></div>
-    -->
-    
-    <ul>
-	  <li v-for="currency in currencyDataList" v-bind:key="currency.ticker">
-	  	<div>
-    		<span style="color: red;">{{ currency.ticker }}</span>
-    		<span style="color: blue;">ÇöÀç°¡ {{ currency.closing_price }}</span>
-	    </div>
-	  </li>
-	</ul>
-</div>
+
+	<!-- í—¤ë” !-->
+	<nav class="navbar navbar-inverse">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">BigCoin</a>
+			</div>
+			<div class="collapse navbar-collapse" id="myNavbar">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="#">Home</a></li>
+					<li><a href="#">About</a></li>
+					<li><a href="#">Projects</a></li>
+					<li><a href="#">Contact</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!-- ì¤‘ê°„ !-->
+	<div id="app" class="container">
+		<div class="list-group">
+			<a class="list-group-item" v-for="currency in currencyDataList" v-bind:key="currency.ticker">
+				<h4 class="list-group-item-heading">{{ currency.ticker }}</h4>
+				<p class="list-group-item-text"> {{ currency.closing_price }}</p>
+			</a>
+		</div>
+	</div>
+
+	<!-- í‘¸í„°  !-->
+	<footer class="container-fluid text-center">
+		<p>Footer Text</p>
+	</footer>
+
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<!-- °³¹ß¹öÀü, µµ¿òµÇ´Â ÄÜ¼Ö °æ°í¸¦ Æ÷ÇÔ. -->
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
-var app = new Vue({
-	el : '#app',
-	data() {
-		return {
-			currencyDataList : []
+	var app = new Vue({
+		el: '#app',
+		data() {
+			return {
+				currencyDataList: []
+			}
+		},
+		mounted() {
+			const wsUri = "http://localhost:8080/websocket";
+			const websocket = new SockJS(wsUri);
+
+			websocket.onopen = (evt) => {
+				console.log('onopen');
+			};
+			websocket.onmessage = (evt) => {
+				var responseData = JSON.parse(evt.data);
+				if (Array.isArray(responseData)) {
+					this.currencyDataList = responseData;
+
+				} else {
+					var currency = this.currencyDataList.find(function (currency) {
+						if (currency.ticker === responseData.ticker) {
+							return true;
+						}
+					});
+					this.$set(this.currencyDataList, this.currencyDataList.indexOf(currency), responseData);
+				}
+			};
+			websocket.onerror = (evt) => {
+				console.log('onerror : ' + evt.data);
+			};
 		}
-	},
-	mounted() {
-		const wsUri = "http://localhost:8080/websocket";
-		const websocket = new SockJS(wsUri);
-		
-		websocket.onopen = (evt) => {
-            console.log('onopen');
-        };
-        websocket.onmessage = (evt) => {
-            var responseData = JSON.parse(evt.data);
-            if (Array.isArray(responseData)) {
-				this.currencyDataList = responseData;  	
-				
-            } else {
-            	var currency = this.currencyDataList.find(function(currency) {
-            		if (currency.ticker === responseData.ticker) {
-            			return true;
-            		}
-            	});
-            	this.$set(this.currencyDataList, this.currencyDataList.indexOf(currency), responseData);
-            }
-        };
-        websocket.onerror = (evt) => {
-             console.log('onerror : ' + evt.data);
-        };
+	})
+
+	/*
+	// 1. sockjs ï¿½Ì»ï¿½ï¿½
+	// var wsUri = "ws://localhost:8080/websocket";
+	// 2. sockjs ï¿½ï¿½ï¿½
+	var wsUri = "http://localhost:8080/websocket";
+
+	var websocket;
+	var output;
+	var textID;
+
+	function init() {
+		output = document.getElementById("output");
+		textID = document.getElementById("textID");
 	}
-})
+	function connect() {
+		if (!websocket) {
+			// 1. sockjs ï¿½Ì»ï¿½ï¿½
+			//websocket = new WebSocket(wsUri);
+			// 2. sockjs ï¿½ï¿½ï¿½
+			websocket = new SockJS(wsUri);
+			websocket.onopen = function (evt) {
+				onOpen(evt)
+			};
+			websocket.onmessage = function (evt) {
+				onMessage(evt)
+			};
+			websocket.onerror = function (evt) {
+				onError(evt)
+			};
+		}
+	}
 
-/*
-// 1. sockjs ¹Ì»ç¿ë
-// var wsUri = "ws://localhost:8080/websocket";
-// 2. sockjs »ç¿ë
-var wsUri = "http://localhost:8080/websocket";
+	function disconnect() {
+		if (!websocket) websocket.close();
+	}
 
-var websocket;
-var output;
-var textID;
+	function send_message() {
+		var message = textID.value;
+		writeToScreen("Message Sent: " + message);
+		websocket.send(message);
+	}
 
-function init() {
-    output = document.getElementById("output");
-    textID = document.getElementById("textID");
-}
-function connect() {
-    if (!websocket) {
-    	// 1. sockjs ¹Ì»ç¿ë
-        //websocket = new WebSocket(wsUri);
-        // 2. sockjs »ç¿ë
-        websocket = new SockJS(wsUri);
-        websocket.onopen = function (evt) {
-            onOpen(evt)
-        };
-        websocket.onmessage = function (evt) {
-            onMessage(evt)
-        };
-        websocket.onerror = function (evt) {
-            onError(evt)
-        };
-    }
-}
+	function onOpen(evt) {
+		writeToScreen("Connected to Endpoint!");
+	}
 
-function disconnect() {
-    if (!websocket) websocket.close();
-}
+	function onMessage(evt) {
+		writeToScreen("Message Received: " + evt.data);
+	}
 
-function send_message() {
-    var message = textID.value;
-    writeToScreen("Message Sent: " + message);
-    websocket.send(message);
-}
+	function onError(evt) {
+		writeToScreen('ERROR: ' + evt.data);
+	}
 
-function onOpen(evt) {
-    writeToScreen("Connected to Endpoint!");
-}
-
-function onMessage(evt) {
-    writeToScreen("Message Received: " + evt.data);
-}
-
-function onError(evt) {
-    writeToScreen('ERROR: ' + evt.data);
-}
-
-function writeToScreen(message) {
-    var pre = document.createElement("p");
-    pre.style.wordWrap = "break-word";
-    pre.innerHTML = message;
-    output.appendChild(pre);
-}
-window.addEventListener("load", init, false);
-*/
+	function writeToScreen(message) {
+		var pre = document.createElement("p");
+		pre.style.wordWrap = "break-word";
+		pre.innerHTML = message;
+		output.appendChild(pre);
+	}
+	window.addEventListener("load", init, false);
+	*/
 </script>
+
 </html>
